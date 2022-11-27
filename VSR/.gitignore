@@ -6,3 +6,9 @@ __pycache__/
 *.pyc
 *.tar
 .DS_Store
+
+# Data
+models/LRS2/model.pth
+language_models/LRS2/model.pth
+face_detection/
+face_alignment/
