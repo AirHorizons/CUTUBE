@@ -7,6 +7,7 @@
 import os
 import torch
 import argparse
+from glob import glob
 from metrics.measures import get_wer
 from metrics.measures import get_cer
 from lipreading.utils import save2npz
@@ -159,6 +160,7 @@ def one_step_inference(lipreader, data_filename, landmarks_filename, dst_filenam
     output = lipreader(data_filename, landmarks_filename)
     if isinstance(output, str):
         print(f"hyp: {output}")
+        return output
     elif isinstance(output, tuple):
         assert dst_filename[-4:] == ".avi", f"the ext of {dst_filename} should be .avi"
         print(f"mouth patch is saved to {dst_filename}.")
@@ -186,12 +188,34 @@ def main():
     )
     
     if args.data_filename is not None:
-        one_step_inference(
-            lipreader,
-            args.data_filename,
-            args.landmarks_filename,
-            args.dst_filename,
-        )
+        if args.data_filename[-4:] == ".mp4":
+            print(f"filename is mp4 file.")
+            one_step_inference(
+                lipreader,
+                args.data_filename,
+                args.landmarks_filename,
+                args.dst_filename,
+            )
+        else :
+            for subt_id in os.listdir(args.data_filename) :
+                
+                PATH = os.path.join(args.data_filename,'*.mp4')
+                filelist = glob(PATH)
+                st_id = args.data_filename
+                with open("lipreading_output.csv", 'wr') as f :
+
+                    for fl in filelist :
+                        #fl은 speaker id.
+                        res = one_step_inference(
+                        lipreader,
+                        args.data_filename,
+                        args.landmarks_filename,
+                        args.dst_filename,
+                        )
+                        f.write()
+
+
+
     else:
         assert os.path.isdir(args.data_dir), \
             f"{args.data_dir} is not a directory."
