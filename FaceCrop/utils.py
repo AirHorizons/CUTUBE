@@ -12,7 +12,7 @@ def time_string_to_seconds(time_string):
     Return: time in seconds
     '''
     time_string = time_string.split(':')
-    seconds = int(time_string[0]) * 3600 + int(time_string[1]) * 60 + float(time_string[2])
+    seconds = int(time_string[0]) * 3600 + int(time_string[1]) * 60 + float(time_string[2].replace(',', '.'))
     return seconds
 
 
@@ -34,8 +34,8 @@ def get_frameId2subtitleId(csv_path, FPS):
     # {frame_id: subtitle_id}
     
     with open(csv_path, 'r') as f:
-        csvReader = csv.DictReader(f)
-
+        csvReader = csv.DictReader(f, delimiter=';')
+        
         # convert each row into dictionary
         for rows in csvReader:
 
