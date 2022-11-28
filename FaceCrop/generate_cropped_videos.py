@@ -119,8 +119,7 @@ def generate_cropped_videos(original_video_path, faces_results, cropped_bbox_inf
     video_writer = {}
     for face_id, (max_width, max_height) in bbox_max_sizes.items():
         video_name = os.path.join(cropped_videos_output_dir, f'{face_id}.mp4')
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        video_writer[face_id] = cv2.VideoWriter(video_name, fourcc, FPS, (max_width, max_height))
+        video_writer[face_id] = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*'mp4v'), FPS, (max_width, max_height))
 
     frame_id = 0
     while True:
@@ -135,6 +134,7 @@ def generate_cropped_videos(original_video_path, faces_results, cropped_bbox_inf
 
         # Skip if the frame id is not in faces_results
         if str(frame_id) not in faces_results:
+            frame_id += 1
             continue
 
         # Crop the faces
