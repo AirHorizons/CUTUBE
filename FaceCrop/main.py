@@ -85,11 +85,11 @@ def pipeline():
     # Blindly detect faces from original video
     # By using yolo-face
     yoloface_result_json = os.path.join(args.temp_outputs_dir, 'yoloface_result.json')
-    yoloface_detection(original_video_path = args.original_input_video,
-                    frame_subtitle_id = frameId2subtitleId,
-                    yoloface_result_json_path = yoloface_result_json,
-                    model_cfg = args.model_cfg,
-                    model_weights = args.model_weights)
+    # yoloface_detection(original_video_path = args.original_input_video,
+    #                 frame_subtitle_id = frameId2subtitleId,
+    #                 yoloface_result_json_path = yoloface_result_json,
+    #                 model_cfg = args.model_cfg,
+    #                 model_weights = args.model_weights)
 
     # Read the json file with faces results
     with open(yoloface_result_json, 'r') as f:
