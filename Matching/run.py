@@ -22,9 +22,9 @@ def allocate(subtitle_path = 'subtitle.csv', generated_path = 'generated_subtitl
         writer = csv.writer(fw, delimiter=';')
         writer.writerow(['subtitle_id', 'start_time', 'end_time', 'speaker_id', 'matched_GT_subt'])
         with open(generated_path) as f_gen:
-            gen_reader = csv.reader(f_gen, delimiter='/')
+            gen_reader = csv.reader(f_gen, delimiter=';')
             with open(subtitle_path) as f_sub:
-                sub_reader = csv.reader(f_sub, delimiter='/')
+                sub_reader = csv.reader(f_sub, delimiter=';')
                 # skip the first row
                 speaker_dict = {}
                 gen_data = list(gen_reader)[1:]
