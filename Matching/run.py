@@ -20,7 +20,7 @@ def allocate(subtitle_path = 'subtitle.csv', generated_path = 'generated_subtitl
     '''
     with open('matched_subtitles.csv', 'w') as fw:
         writer = csv.writer(fw, delimiter=';')
-        writer.writerow(['subtitle_id', 'start_time', 'end_time', 'speaker_id', 'matched_GT_subt'])
+        writer.writerow(['subtitle_id', 'start_time', 'end_time', 'speaker_id', 'subtitle'])
         with open(generated_path) as f_gen:
             gen_reader = csv.reader(f_gen, delimiter=';')
             with open(subtitle_path) as f_sub:
