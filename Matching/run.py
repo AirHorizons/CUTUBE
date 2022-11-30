@@ -19,15 +19,16 @@ def allocate(subtitle_path = 'subtitle.csv', generated_path = 'generated_subtitl
     generated_path: string, path of csv file
     '''
     with open('matched_subtitles.csv', 'w') as fw:
-        writer = csv.writer(fw, delimiter='/')
+        writer = csv.writer(fw, delimiter=';')
+        writer.writerow(['subtitle_id', 'start_time', 'end_time', 'speaker_id', 'matched_GT_subt'])
         with open(generated_path) as f_gen:
             gen_reader = csv.reader(f_gen, delimiter='/')
             with open(subtitle_path) as f_sub:
                 sub_reader = csv.reader(f_sub, delimiter='/')
                 # skip the first row
                 speaker_dict = {}
-                gen_data = list(gen_reader)
-                sub_data = list(sub_reader)
+                gen_data = list(gen_reader)[1:]
+                sub_data = list(sub_reader)[1:]
                 sentences, lines = [], []
                 latest_sub_id = -1
                 for i, (sub_line, gen_line) in enumerate(zip(sub_data, gen_data)):
