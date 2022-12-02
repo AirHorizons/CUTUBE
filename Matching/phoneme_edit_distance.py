@@ -41,7 +41,8 @@ def compare_distance(sent1, sent2):
     return edit_distance, dtw_distance
 
 def calculate_distances(sentences, f = editdistance.eval):
-    distances = [[f(sentences[i][0].replace(' ',''), sentences[j][1].replace(' ',''))/((len(sentences[i][0]) + len(sentences[j][1]))/2) for j in range(len(sentences))] for i in range(len(sentences))]
+    eps = 1e-9
+    distances = [[f(sentences[i][0].replace(' ',''), sentences[j][1].replace(' ',''))/((len(sentences[i][0]) + len(sentences[j][1]))/2 + eps) for j in range(len(sentences))] for i in range(len(sentences))]
     
     return distances
 
@@ -63,8 +64,8 @@ def draw_heatmap(arr, title):
 '''
 
 def match_subtitles(sentences):
-    phoneme_sentences = [(lexeme_to_phoneme(s1), lexeme_to_phoneme(s2)) for (s1, s2) in sentences]
-    distances = calculate_distances(phoneme_sentences)
+    # phoneme_sentences = [(lexeme_to_phoneme(s1), lexeme_to_phoneme(s2)) for (s1, s2) in sentences]
+    distances = calculate_distances(sentences)
     total_distances = []
     xs = np.arange(len(sentences))
     for i, ys in enumerate(permutations(xs)):

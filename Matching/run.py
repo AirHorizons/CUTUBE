@@ -26,10 +26,69 @@ def allocate(subtitle_path = 'subtitle.csv', generated_path = 'generated_subtitl
             with open(subtitle_path) as f_sub:
                 sub_reader = csv.reader(f_sub, delimiter=';')
                 # skip the first row
-                speaker_dict = {}
-                gen_data = list(gen_reader)[1:]
+                gen_data = list(gen_reader)
+                gen_data_dict = {}
+                for sub_id, speaker_id, gen_text in gen_data:
+                    if sub_id not in gen_data_dict:
+                        gen_data_dict[sub_id] = [(speaker_id, gen_text)]
+                    else:
+                        gen_data_dict[sub_id].append((speaker_id, gen_text))
+
                 sub_data = list(sub_reader)[1:]
-                sentences, lines = [], []
+                sub_data_dict = {}
+                for sub_id, start_time, end_time, sub_text in sub_data:
+                    if sub_id not in sub_data_dict:
+                        sub_data_dict[sub_id] = [(start_time, end_time, sub_text)]
+                    else:
+                        sub_data_dict[sub_id].append((start_time, end_time, sub_text))
+
+                for sub_id in sub_data_dict:
+                    subs = sub_data_dict[sub_id]
+                    gens = gen_data_dict[sub_id]
+                    if len(subs) == 1 and len(gens) == 1:
+                        start_time, end_time, sub_text = subs[0]
+                        speaker_id, gen_text = gens[0]
+                        row = [sub_id, start_time, end_time, speaker_id, sub_text]
+                        writer.writerow(row)
+                    elif len(subs) == len(gens):
+                        speaker_dict = {}
+                        sentences = []
+                        for i, (speaker_id, gen_text) in enumerate(gens):
+                            speaker_dict[gen_text] = speaker_id
+                            sentences.append((subs[i][2], gen_text))
+                        result = match_subtitles(sentences)
+                        for i, (start_time, end_time, sub_text) in enumerate(subs):
+                            row = [sub_id, start_time, end_time, speaker_dict[result[sub_text]], sub_text]
+                            writer.writerow(row)
+                    elif len(subs) > len(gens):
+                        speaker_dict = {'': -1}
+                        sentences = []
+                        for i, (speaker_id, gen_text) in enumerate(gens):
+                            speaker_dict[gen_text] = speaker_id
+                            sentences.append((subs[i][2], gen_text))
+                        for i in range(len(subs) - len(gens)):
+                            sentences.append(subs[i + len(gens)][2], '')
+                        result = match_subtitles(sentences)
+                        for i, (start_time, end_time, sub_text) in enumerate(subs):
+                            row = [sub_id, start_time, end_time, speaker_dict[result[sub_text]], sub_text]
+                            writer.writerow(row)
+                    else: # len(subs) < len(gens)
+                        speaker_dict = {'': -1}
+                        sentences = []
+                        for i, (speaker_id, gen_text) in enumerate(gens):
+                            speaker_dict[gen_text] = speaker_id
+                            sub_text = subs[i][2] if i < len(subs) else ''
+                            sentences.append((sub_text, gen_text))
+                        result = match_subtitles(sentences)
+                        for i, (start_time, end_time, sub_text) in enumerate(subs):
+                            row = [sub_id, start_time, end_time, speaker_dict[result[sub_text]], sub_text]
+                            writer.writerow(row)
+
+                    # print(sub_id)
+                    # print(subs)
+                    # print(gens)
+
+                '''sentences, lines = [], []
                 latest_sub_id = -1
                 for i, (sub_line, gen_line) in enumerate(zip(sub_data, gen_data)):
                     sub_id, speaker_id, gen_text = map(lambda x:x.strip(), gen_line)
@@ -56,7 +115,7 @@ def allocate(subtitle_path = 'subtitle.csv', generated_path = 'generated_subtitl
                     for sub_id, start_time, end_time, sub_text in lines:
                         row = [sub_id, start_time, end_time, speaker_dict[result[sub_text]], sub_text]
                         writer.writerow(row)
-                        sentences, lines = [], []
+                        sentences, lines = [], []'''
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
