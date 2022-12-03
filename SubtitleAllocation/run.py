@@ -19,6 +19,9 @@ parser.add_argument('--matched_subtitle_path', type=str, default='matched_TED_su
 # output arguments
 parser.add_argument('--output_video_path', type=str, default='final_output.mp4',)
 
+# subtitle control arguments
+parser.add_argument('--fix_subtitle', action='store_true')
+
 args = parser.parse_args()
 
 
@@ -98,6 +101,7 @@ def main():
     video_writer = cv2.VideoWriter(args.output_video_path, cv2.VideoWriter_fourcc(*'mp4v'), FPS, (frame_width, frame_height))
 
     frame_id = 0
+    font = cv2.FONT_HERSHEY_SIMPLEX
     while True:
         has_frame, frame = cap.read()
         
@@ -118,11 +122,17 @@ def main():
                 faces_loc_results = json.load(f)
 
             faces_in_frame = faces_loc_results[str(frame_id)]
-            face2loc = {str(face_id): (x_max,y_max) for face_id, x_min, y_min, x_max, y_max in faces_in_frame}
+
+            # locate subtitle
+            face2loc = {str(face_id): (x_min + x_max, y_max) for face_id, x_min, y_min, x_max, y_max in faces_in_frame}
 
             for speaker_id, subtitle in subtitle_data[frame_id].items():
-                cv2.putText(frame, subtitle, face2loc[speaker_id],
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                if args.fix_subtitle and frame_id == 0:
+                    textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
+                    cv2.putText(frame, subtitle, (face2loc[speaker_id][0]/2 - textsize[0]/2, face2loc[speaker_id][1]), font, 1, (0, 0, 255), 2)
+                else:
+                    textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
+                    cv2.putText(frame, subtitle, (face2loc[speaker_id][0]/2 - textsize[0]/2, face2loc[speaker_id][1]), font, 1, (0, 0, 255), 2)
 
         # Write the frame to the output video
         video_writer.write(frame.astype('uint8'))
