@@ -101,7 +101,31 @@ def main():
     video_writer = cv2.VideoWriter(args.output_video_path, cv2.VideoWriter_fourcc(*'mp4v'), FPS, (frame_width, frame_height))
 
     frame_id = 0
-    font = cv2.FONT_HERSHEY_SIMPLEX
+    font = cv2.FONT_HERSHEY_COMPLEX_SMALL
+    init_pos = {}
+    while len(init_pos) < 2:
+        has_frame, frame = cap.read()
+
+        if frame_id in subtitle_data:
+
+            # Read the json file with faces results
+            subtitle_id = frame2subtitleId[frame_id]
+            face_result_path = os.path.join(args.cropped_videos_dir, f'{subtitle_id}/faces.json')
+            with open(face_result_path, 'r') as f:
+                faces_loc_results = json.load(f)
+
+            faces_in_frame = faces_loc_results[str(frame_id)]
+
+            face2loc = {str(face_id): (x_min + x_max, y_max) for face_id, x_min, y_min, x_max, y_max in faces_in_frame}
+
+            for speaker_id, subtitle in subtitle_data[frame_id].items():
+                    textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
+                    init_pos[int(speaker_id)] = (int(face2loc[speaker_id][0]/2 - textsize[0]/2), int(face2loc[speaker_id][1]))
+                    
+
+        frame_id += 1
+
+    frame_id = 0
     while True:
         has_frame, frame = cap.read()
         
@@ -125,16 +149,22 @@ def main():
             # print("what?", faces_in_frame)
             # locate subtitle
             face2loc = {str(face_id): (x_min + x_max, y_max) for face_id, x_min, y_min, x_max, y_max in faces_in_frame}
-
             for speaker_id, subtitle in subtitle_data[frame_id].items():
-                if args.fix_subtitle and frame_id == 0:
+                if args.fix_subtitle and len(face2loc) != 2:
+                    print("처음임...ㅜ")
                     textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
-                    print("textsize:", textsize)
-                    cv2.putText(frame, subtitle, (int(face2loc[speaker_id][0]/2 - textsize[0]/2), int(face2loc[speaker_id][1])), font, 1, (0, 0, 255), 2)
+                    init_pos[int(speaker_id)] = (int(face2loc[speaker_id][0]/2 - textsize[0]/2), int(face2loc[speaker_id][1]))
+                    cv2.putText(frame, subtitle, init_pos[int(speaker_id)], font, 1, (255,255,255), 2)
                     
                 else:
-                    textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
-                    cv2.putText(frame, subtitle, (int(face2loc[speaker_id][0]/2 - textsize[0]/2), int(face2loc[speaker_id][1])), font, 1, (0, 0, 255), 2)
+                    if args.fix_subtitle:
+                        print("fix_subtitle! working!")
+                        textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
+                        cv2.putText(frame, subtitle, init_pos[int(speaker_id)], font, 1, (255,255,255), 2)
+                    else:
+                        print("fix_subtitle! 아님!")
+                        textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
+                        cv2.putText(frame, subtitle, (int(face2loc[speaker_id][0]/2 - textsize[0]/2), int(face2loc[speaker_id][1])), font, 1, (255, 255, 255), 2)
 
         # Write the frame to the output video
         video_writer.write(frame.astype('uint8'))
