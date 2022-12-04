@@ -119,6 +119,6 @@ def allocate(subtitle_path = 'subtitle.csv', generated_path = 'generated_subtitl
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
-        allocate(sys.argv[1], sys.argv[3])
+        allocate(sys.argv[1], sys.argv[2])
     else:
         allocate()
