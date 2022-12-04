@@ -151,18 +151,17 @@ def main():
             face2loc = {str(face_id): (x_min + x_max, y_max) for face_id, x_min, y_min, x_max, y_max in faces_in_frame}
             for speaker_id, subtitle in subtitle_data[frame_id].items():
                 if args.fix_subtitle and len(face2loc) != 2:
-                    print("처음임...ㅜ")
+                if args.fix_subtitle and len(face2loc) != 2:
+                    
                     textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
                     init_pos[int(speaker_id)] = (int(face2loc[speaker_id][0]/2 - textsize[0]/2), int(face2loc[speaker_id][1]))
                     cv2.putText(frame, subtitle, init_pos[int(speaker_id)], font, 1, (255,255,255), 2)
                     
                 else:
                     if args.fix_subtitle:
-                        print("fix_subtitle! working!")
                         textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
                         cv2.putText(frame, subtitle, init_pos[int(speaker_id)], font, 1, (255,255,255), 2)
                     else:
-                        print("fix_subtitle! 아님!")
                         textsize = cv2.getTextSize(subtitle, font, 1, 2)[0]
                         cv2.putText(frame, subtitle, (int(face2loc[speaker_id][0]/2 - textsize[0]/2), int(face2loc[speaker_id][1])), font, 1, (255, 255, 255), 2)
 
